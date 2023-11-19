@@ -1,0 +1,59 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Cloud Formation Template To Create S3 bucket by applying folder access permissions to user
+Parameters:
+  BucketName:
+    Type: String
+    Default: cf-bank
+  UserGroup: 
+    Type: String
+    Default: mgmt
+    Description: S3 bucket name
+Resources:
+  NayanaS3BucketPolicy:
+    Type: 'AWS::IAM::Policy'
+    Properties:
+      PolicyName: BankAccountAccessPolicy
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Sid: AllowUserToSeeBucketListInTheConsole
+            Action:
+              - 's3:ListAllMyBuckets'
+              - 's3:GetBucketLocation'
+            Effect: Allow
+            Resource:
+              - 'arn:aws:s3:::*'
+          - Sid: AllowRootAndHomeListingOfCompanyBucket
+            Action:
+              - 's3:ListBucket'
+            Effect: Allow
+            Resource:
+              - 'arn:aws:s3:::cf-bank'
+            Condition:
+              StringEquals:
+                's3:prefix':
+                  - ''
+                  - SavingAccount/
+                  - SavingsAccount/L00179216
+                's3:delimiter':
+                  - /
+          - Sid: AllowListingOfUserFolder
+            Action:
+              - 's3:ListBucket'
+            Effect: Allow
+            Resource:
+              - 'arn:aws:s3:::cf-bank'
+            Condition:
+              StringLike:
+                's3:prefix':
+                  - SavingsAccount/L00179216/*
+          - Sid: AllowAllS3ActionsInUserFolder
+            Effect: Allow
+            Action:
+              - 's3:*'
+            Resource:
+              - 'arn:aws:s3:::cf-bank/SavingsAccount/L00179216/*'
+      Groups:
+        - !Ref UserGroup
+
+
