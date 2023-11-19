@@ -1,0 +1,36 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: This template creates security group inbound rule to ssh, http and MySQL database access
+Parameters:
+  VPCID:
+    Type: String
+    Description: Enter VPC ID to be attached to security group
+	
+Resources: 
+  WebSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Webserver and database security group
+      GroupName: WebApp     
+      VpcId: !Ref VPCID
+      SecurityGroupIngress:
+        -
+          IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+	- IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+  DatabaseSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Database server
+      GroupName: database     
+      VpcId: !Ref VPCID
+      SecurityGroupIngress:
+        -
+          IpProtocol: tcp
+          FromPort: 3306
+          ToPort: 3306
+          SourceSecurityGroupId: !Ref WebSecurityGroup
